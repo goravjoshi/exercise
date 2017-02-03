@@ -1,22 +1,16 @@
-import static java.lang.String.format;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
 
-	enum SitePosition {
-		TOP, MIDDLE, BOTTOM
-	};
-
 	private final int squareLength;
+	private final int firstComponent = 0;
+	private final int lastComponent;
 	private final WeightedQuickUnionUF quickUnionFind;
-	private final Set<Integer> topOpenSites = new HashSet<>();
-	private final Set<Integer> middleOpenSites = new HashSet<>();
-	private final Set<Integer> bottomOpenSites = new HashSet<>();
+	private final Set<Integer> openedSite = new HashSet<>();
 
 	public Percolation(int n) {
 		if (n < 0) {
@@ -24,7 +18,10 @@ public class Percolation {
 		}
 
 		this.squareLength = n;
-		int noOfComponents = n * n;
+		this.lastComponent = n * n + 1;
+		// component 0 is connected to top row while component n*n+1 is
+		// connected to bottom row.
+		int noOfComponents = n * n + 2;
 		// create n-by-n grid, with all sites blocked
 		this.quickUnionFind = new WeightedQuickUnionUF(noOfComponents);
 
@@ -34,13 +31,18 @@ public class Percolation {
 	public void open(int row, int col) {
 		checkBoundries(row, col);
 		int componentNumber = getComponentNumber(row, col);
-		if (row == 1) {
-			topOpenSites.add(componentNumber);
-		} else if (row == squareLength) {
-			bottomOpenSites.add(componentNumber);
-		} else {
-			middleOpenSites.add(componentNumber);
+		int[] neighborComponentNumber = getNeighborComponentNumber(row, col);
+		for (int neighbor : neighborComponentNumber) {
+			if (openedSite.contains(neighbor)) {
+				quickUnionFind.union(componentNumber, neighbor);
+			}
 		}
+		if (row == 1) {
+			quickUnionFind.union(firstComponent, componentNumber);
+		} else if (row == squareLength) {
+			quickUnionFind.union(lastComponent, componentNumber);
+		}
+		openedSite.add(componentNumber);
 	}
 
 	// is site (row, col) open?
@@ -49,43 +51,27 @@ public class Percolation {
 		int componentNumber = getComponentNumber(row, col);
 		return isOpen(componentNumber);
 	}
-	
+
 	private boolean isOpen(int componentNumber) {
-		return topOpenSites.contains(componentNumber) || middleOpenSites.contains(componentNumber)
-				|| bottomOpenSites.contains(componentNumber);
+		return openedSite.contains(componentNumber);
 	}
 
 	public boolean isFull(int row, int col) {
-		return !isOpen(row, col);
+		checkBoundries(row, col);
+		return quickUnionFind.connected(firstComponent, getComponentNumber(row, col));
 	}
 
 	public int numberOfOpenSites() {
-		return topOpenSites.size() + middleOpenSites.size()
-				+ bottomOpenSites.size();
+		return openedSite.size();
 	}
 
 	public boolean percolates() {
-		connect(topOpenSites);
-		connect(middleOpenSites);
-		connect(bottomOpenSites);
-
-		return false;
-	}
-
-	private void connect(Set<Integer> openSites) {
-		for (Integer compNumber : openSites) {
-			int[] neighborComponentNumber = getNeighborComponentNumber(compNumber);
-			for (int i : neighborComponentNumber) {
-				if(isOpen(i)) {
-					quickUnionFind.union(compNumber, i);
-				}
-			}
-		}
+		return quickUnionFind.connected(firstComponent, lastComponent);
 	}
 
 	private void checkBoundries(int row, int col) {
 		if (!((row > 0 && row <= squareLength) || (col > 0 || col <= squareLength))) {
-			throw new IndexOutOfBoundsException(format("Invalid row/columns [%s,%s]", row, col));
+			throw new IndexOutOfBoundsException(String.format("Invalid row/columns [%s,%s]", row, col));
 		}
 	}
 
@@ -94,15 +80,8 @@ public class Percolation {
 		return (startIndex * squareLength) + col;
 	}
 
-	private int[] getNeighborComponentNumber(int componentNumber) {
-		int row, col;
-		if(componentNumber % squareLength == 0) {
-			row = componentNumber / squareLength;						
-		} else {
-			row = componentNumber/squareLength + 1;			
-		}
-		col = componentNumber - (row - 1)*squareLength;
-		
+	private int[] getNeighborComponentNumber(int row, int col) {
+
 		if (isAtTheBorder(row, col) && isAtDiagonalEnd(row, col)) {
 			if (row == 1 && col == squareLength) {
 				return new int[] { getComponentNumber(row, col - 1), getComponentNumber(row + 1, col) };
@@ -146,7 +125,12 @@ public class Percolation {
 	}
 
 	public static void main(String[] args) {
-		// test client (optional)
+		Percolation p = new Percolation(2);
+		p.open(1, 1);
+		p.open(1, 2);
+		p.open(2, 2);
+
+		System.out.println("Percolates ? " + p.percolates());
 	}
 
 }
