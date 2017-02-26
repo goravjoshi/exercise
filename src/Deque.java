@@ -86,14 +86,14 @@ public class Deque<Item> implements Iterable<Item> {
 			
 			@Override
 			public boolean hasNext() {
-				return index==tail;
+				return (index+1)!=tail;
 			}
 
 			@Override
 			public Item next() {
-				index = (index+1)&items.length-1;
+				index = (index+1) & items.length-1;
 				@SuppressWarnings("unchecked")
-				Item i = (Item)items[index++];
+				Item i = (Item)items[index];
 				return i;
 			}
 		};
@@ -101,6 +101,20 @@ public class Deque<Item> implements Iterable<Item> {
 
 	public static void main(String[] args) {
 		// unit testing (optional)
+		
+		Deque<Integer> d = new Deque<>();
+		d.addLast(3);
+		d.addLast(6);
+		d.addLast(1);
+		d.addLast(9);
+		d.addFirst(10);
+		
+		assert d.size() == 5;
+		System.out.println("Printing: ");
+		for (Integer integer : d) {
+			System.out.println(integer);
+		}
+		
 	}
 
 	private void checkForNotNull(Item item) {
