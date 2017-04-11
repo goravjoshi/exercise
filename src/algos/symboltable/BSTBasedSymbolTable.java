@@ -82,21 +82,54 @@ public class BSTBasedSymbolTable<Key extends Comparable<Key>,Value> implements S
 
     @Override
     public Key min() {
-        // TODO Auto-generated method stub
-        return null;
+        return recursiveMin(rootNode);        
+    }
+
+    private Key recursiveMin(Node aNode) {
+        if(aNode.leftChild == null) {
+            return aNode.k;
+        } else {
+            return recursiveMin(aNode.leftChild);
+        }
     }
 
     @Override
     public Key max() {
-        // TODO Auto-generated method stub
-        return null;
+        return recursiveMax(rootNode);
+    }
+
+    private Key recursiveMax(Node aNode) {
+        if(aNode.rightChild == null) {
+            return aNode.k;
+        } else {
+            return recursiveMax(aNode.rightChild);    
+        }
     }
 
     @Override
     public Key floor(Key key) {
-        // TODO Auto-generated method stub
-        return null;
+        return recursiveFloor(key, rootNode);
+//        return floor(rootNode, key).k;
     }
+
+    private Key recursiveFloor(Key input, Node aNode) {
+        Key result;
+        if(aNode == null) return null;
+        int cmp = aNode.k.compareTo(input);
+        if(cmp == 0) {
+            return aNode.k;
+        } else if(cmp > 0){
+            return recursiveFloor(input, aNode.leftChild);            
+        } else {
+            result = recursiveFloor(input, aNode.rightChild);
+        }
+        
+        if(result == null) {
+            return aNode.k; 
+        } else {
+            return result;
+        }
+    }    
 
     @Override
     public Key ceiling(Key key) {
@@ -161,6 +194,11 @@ public class BSTBasedSymbolTable<Key extends Comparable<Key>,Value> implements S
         public Node(Key key, Value val) {
             this.k = key;
             this.v = val;
+        }
+        
+        @Override
+        public String toString() {
+            return k.toString();
         }
     }
     
