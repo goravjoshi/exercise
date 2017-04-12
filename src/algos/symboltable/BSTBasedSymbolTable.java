@@ -109,7 +109,6 @@ public class BSTBasedSymbolTable<Key extends Comparable<Key>,Value> implements S
     @Override
     public Key floor(Key key) {
         return recursiveFloor(key, rootNode);
-//        return floor(rootNode, key).k;
     }
 
     private Key recursiveFloor(Key input, Node aNode) {
@@ -133,21 +132,65 @@ public class BSTBasedSymbolTable<Key extends Comparable<Key>,Value> implements S
 
     @Override
     public Key ceiling(Key key) {
-        // TODO Auto-generated method stub
-        return null;
+        return recursiveCeiling(rootNode, key);
+    }
+
+    private Key recursiveCeiling(Node aNode, Key key) {
+        if(aNode == null) return null;
+        int cmp = aNode.k.compareTo(key);
+        if(cmp == 0) {
+            return key;
+        } else if(cmp < 0) {
+            return recursiveCeiling(aNode.rightChild, key);
+        } else {
+            Key r = recursiveCeiling(aNode.leftChild, key);
+            if(r == null) {
+                return aNode.k;
+            } else {
+                return r;
+            }
+        }
     }
 
     @Override
     public int rank(Key key) {
-        // TODO Auto-generated method stub
-        return 0;
+        return findRank(rootNode, key);
+    }
+
+    private int findRank(Node aNode, Key key) {
+        if(aNode == null) return 0;
+        int cmp = aNode.k.compareTo(key);
+        if(cmp > 0) {
+            return findRank(aNode.leftChild, key);
+        } else if(cmp < 0) {
+            return 1 + size(aNode.leftChild)+ findRank(aNode.rightChild, key);
+        } else {
+            return size(aNode.leftChild);
+        }
     }
 
     @Override
-    public Key select(int k) {
-        // TODO Auto-generated method stub
-        return null;
+    public Key select(int rank) {
+        return findNodeForRank(rootNode, rank).k;        
     }
+
+    private Node findNodeForRank(Node aNode, int rank) {    
+        if(aNode == null) return null;
+        int n = size(aNode.leftChild);
+        if(n > rank) {
+            return findNodeForRank(aNode.leftChild, rank);
+        } else if(n < rank) {
+            return findNodeForRank(aNode.rightChild, rank-n-1);
+        } else {
+            return aNode;
+        }
+    }
+    
+    int size(Node node) {
+        if(node == null) return 0; 
+        return node.size;
+    }
+   
 
     @Override
     public void deleteMin() {
