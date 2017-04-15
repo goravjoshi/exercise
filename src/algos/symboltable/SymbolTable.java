@@ -110,4 +110,6 @@ public interface SymbolTable<Key extends Comparable<Key>, Value> {
      * @return
      */
     Iterable<Key> keys();
+
+    void preOrderTraversal();
 }
