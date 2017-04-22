@@ -11,6 +11,11 @@ public class TestClient {
 //            String key = StdIn.readString();
 //            st.put(key, i);
 //        }
+        test(st);
+        test(new RedBlackBST<String,Integer>());        
+    }
+
+    private static void test(SymbolTable<String, Integer> st) {
         int index = 0;
         for(char s:"SEARCHEXAMPLE".toCharArray()) {
             st.put(String.valueOf(s), index++);
@@ -73,9 +78,5 @@ public class TestClient {
         for(String s: st.keys("C", "H")){
             StdOut.println(s + " " + st.get(s));
         }
-        
-        
-        
-        
     }
 }
